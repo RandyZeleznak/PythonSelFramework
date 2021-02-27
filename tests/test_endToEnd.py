@@ -19,8 +19,8 @@ class TestOne(BaseClass):
             print(cardText)
             print(i)
             if cardText == "Blackberry":
-                self.driver.find_elements_by_css_selector(".card-footer button").click()
-                
+                self.driver.find_elements_by_css_selector(".card-footer button")[i].click()
+
         self.driver.find_elements_by_css_selector("a[class*='btn-primary']").click()
 
         self.driver.find_element_by_xpath("//button[@class='btn btn-success']").click()
