@@ -1,34 +1,43 @@
+from telnetlib import EC
+
 from selenium import webdriver
 import pytest
-
+from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+
+from PageObjects.CheckoutPage import CheckoutPage
+from PageObjects.HomePage import HomePage
+from PageObjects.ConfirmPage import ConfirmPage
 from utilities.BaseClass import BaseClass
 
 
 class TestOne(BaseClass):
 
     def test_endToEnd(self, setup):
-
-        self.driver.find_element_by_css_selector("a[href*='shop']").click()
-        cards = self.driver.find_elements_by_css_selector(".card-title a")
+        log = self.getLogger()
+        homepage = HomePage(self.driver)
+        checkoutPage = homepage.shopItems()
+        log.info("Getting all the card Titles")
+        cards = checkoutPage.getCardTitles()
         i = -1
         for card in cards:
             i = i + 1
             cardText = card.text
-            print(cardText)
-            print(i)
+            log.info(cardText)
             if cardText == "Blackberry":
-                self.driver.find_elements_by_css_selector(".card-footer button")[i].click()
+                checkoutPage.getCardFooter()[i].click()
 
-        self.driver.find_elements_by_css_selector("a[class*='btn-primary']").click()
+        checkoutPage.getInitialCheckOut().click()
 
-        self.driver.find_element_by_xpath("//button[@class='btn btn-success']").click()
-        self.driver.find_element_by_id("country").send_keys("united")
-        element = WebDriverWait(self.driver, 10).until(
-            EC.presence_of_element_located((By.LINK_TEXT, "United States of America")))
-        self.driver.find_element_by_xpath("//div[@class='checkbox checkbox-primary']").click()
-        self.driver.find_elements_by_css_selector("[type='submit']").click
-        textMatch = self.driver.find_elements_by_css_selector("[class*='alert-succes']").text
+        confirmPage = checkoutPage.getCheckOut()
+        log.info("Entering to search for country name")
+        confirmPage.getFindCountry().send_keys("united")
+        self.verifyLinkPresence("United States of America")
+        confirmPage.getConfirmCountry().click()
+        confirmPage.getCheckBox().click()
+        confirmPage.getSubmit().click()
+        textMatch = confirmPage.getSuccessText()
+        log.info("Screen Text received is " +textMatch)
 
         assert ("Success! Thank you!" in textMatch)
